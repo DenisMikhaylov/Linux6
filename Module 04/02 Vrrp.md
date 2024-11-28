@@ -18,21 +18,39 @@ iface eth0 inet static
 node1# nano /etc/keepalived/keepalived.conf
 ```
 ```
+global_defs {
+router_id uMASTER
+enable_script_security
+script_user root
+}
+vrrp_script myhealth {
+    script "/bin/nc -z -w 2 127.0.0.1 53"
+    interval 10
+    user nobody
+}
 vrrp_instance VI_1 {
 
-  state MASTER
+    state MASTER
+    interface br0
+    priority 90
+    advert_int 1
+    nopreempt
 
-    interface eth1
+        authentication {
+        auth_type PASS
+        auth_pass secret
+        }
+
     virtual_router_id 1
     virtual_ipaddress {
-        192.168.123.121/24 dev eth0
-        192.168.10.254/24 dev eth1
+        192.168.10.254
     }
     virtual_routes {
         0.0.0.0/0 via 192.168.123.2 dev eth0
     }
-    notify_backup "/usr/local/bin/vrrp.sh BACKUP"
-    notify_master "/usr/local/bin/vrrp.sh MASTER"
+    track_script {
+        myhealth
+    }
 }
 ```
 На Node2
@@ -55,21 +73,39 @@ iface eth0 inet static
 node2# nano /etc/keepalived/keepalived.conf
 ```
 ```
+global_defs {
+router_id uBACKUP
+enable_script_security
+script_user root
+}
+vrrp_script myhealth {
+    script "/bin/nc -z -w 2 127.0.0.1 53"
+    interval 10
+    user nobody
+}
 vrrp_instance VI_1 {
 
-  state BACKUP
+    state BACKUP
+    interface br0
+    priority 90
+    advert_int 1
+    nopreempt
 
-    interface eth1
+        authentication {
+        auth_type PASS
+        auth_pass secret
+        }
+
     virtual_router_id 1
     virtual_ipaddress {
-        192.168.123.121/24 dev eth0
-        192.168.10.254/24 dev eth1
+        192.168.10.254
     }
     virtual_routes {
         0.0.0.0/0 via 192.168.123.2 dev eth0
     }
-    notify_backup "/usr/local/bin/vrrp.sh BACKUP"
-    notify_master "/usr/local/bin/vrrp.sh MASTER"
+    track_script {
+        myhealth
+    }
 }
 ```
 
