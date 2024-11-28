@@ -43,6 +43,9 @@ node1# lxc-create -t debian -n server-template
 ```
 Установка ПО в дочерней системе/шаблоне
 ```
+```
+chroot /var/lib/lxc/server-template/rootfs/ /bin/bash
+```
 меняем строку приветствия что бы понимать где мы находимся
 ```
 PS1='server-template:\w# '
