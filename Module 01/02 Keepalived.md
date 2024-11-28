@@ -25,7 +25,7 @@ vrrp_instance VI_1 {
 
     state MASTER
     interface br0
-    priority 90
+    priority 100
     advert_int 1
     nopreempt
 
